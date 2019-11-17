@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+# Having a simple script like this is a bit easier than a multi-package shell.nix
+# for doing rapid development.
+
+# DEBUG=1
+[ ! -z "${DEBUG}" ] && set -x
+
+REPO=${REPO:-nixpkgs}
+REV=${REV:-c09bc3e7e2f29b860bc554e04176953989a5b940}
+URL="https://github.com/NixOS/${REPO}/archive/${REV}.tar.gz"
+HS_PKGS=${HS_PKGS:-"haskellPackages"}
+
+exec nix-shell \
+        -I nixpkgs="${URL}" \
+        -p "pkgs.${HS_PKGS}.ghcWithPackages (p: with p; [
+                cabal-install
+                contravariant kan-extensions generics-sop
+        ])" "$@"

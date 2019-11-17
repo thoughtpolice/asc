@@ -1,0 +1,116 @@
+cabal-version: 2.4
+
+-------------------------------------------------------------------------------
+
+name:       avc
+version:    0.0.0.0
+synopsis:   Austin's Supercompiler
+license:    MIT
+copyright:  Copyright (c) Austin Seipp 2019
+author:     Austin Seipp
+maintainer: aseipp@pobox.com
+
+homepage:    https://example.com
+bug-reports: https://example.com
+
+category:     Compiler
+license-file: LICENSE.txt
+tested-with:  GHC == 8.6.5
+
+description:
+  Austin's (super)compiler collection.
+
+-------------------------------------------------------------------------------
+-- Extra metadata
+
+source-repository upstream
+  type: git
+  location: https://github.com/...
+
+-------------------------------------------------------------------------------
+-- Common stanzas
+
+common def-opts
+  ghc-options: -Wall -fwarn-tabs
+  default-language: Haskell2010
+  default-extensions:
+    ConstraintKinds
+    DataKinds
+    DefaultSignatures
+    DeriveAnyClass
+    InstanceSigs
+    KindSignatures
+    NoStarIsType
+    PolyKinds    
+    RankNTypes
+    TypeFamilies
+  build-depends:
+    base ^>= 4.12,
+    containers,
+    contravariant,
+    kan-extensions
+
+common lib-opts
+  import: def-opts
+  hs-source-dirs: src/lib
+
+common lang-opts
+  import: def-opts
+  hs-source-dirs: src/langs
+
+  -- FIXME: hide 'generics-sop' in 'supercomp'
+  build-depends:
+    supercomp,
+    generics-sop 
+
+common exe-opts
+  import: def-opts
+  hs-source-dirs: src/exe
+
+-------------------------------------------------------------------------------
+-- Interfaces
+
+-------------------------------------------------------------------------------
+-- Libraries
+
+library supercomp
+  import: lib-opts
+  build-depends:
+    generics-sop
+
+  exposed-modules:
+    Control.Termination
+
+    Data.Ap
+    Data.Fix
+    Data.Fix.List
+    Data.Fix.Rose
+    Data.TagBag
+
+-------------------------------------------------------------------------------
+-- Language: Simple Core
+
+library simple-core-lib
+  import: lang-opts
+  exposed-modules: SimpleCore
+
+executable simple-core
+  import: exe-opts
+  main-is: Main.hs
+  build-depends: simple-core-lib
+  mixins: simple-core-lib (SimpleCore as Language)
+
+-------------------------------------------------------------------------------
+-- Language: More Core
+
+library more-core-lib
+  import: lang-opts
+  exposed-modules: MoreCore
+
+executable more-core
+  import: exe-opts
+  main-is: Main.hs
+  build-depends: more-core-lib
+  mixins: more-core-lib (MoreCore as Language)
+
+-------------------------------------------------------------------------------
